@@ -1,0 +1,582 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Library Management System</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+        }
+
+        .navbar {
+            background-color: #2c3e50;
+            color: white;
+            padding: 20px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+            .navbar h1 {
+                margin: 0;
+                font-size: 24px;
+                font-weight: normal;
+            }
+
+            .navbar nav {
+                display: flex;
+                gap: 30px;
+                align-items: center;
+            }
+
+            .navbar a {
+                color: white;
+                text-decoration: none;
+                font-size: 16px;
+                transition: opacity 0.3s;
+            }
+
+                .navbar a:hover {
+                    opacity: 0.8;
+                }
+
+        .logout-btn {
+            background: #e74c3c;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.3s;
+        }
+
+            .logout-btn:hover {
+                background: #c0392b;
+            }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        .hero {
+            background: white;
+            padding: 60px 80px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin-bottom: 50px;
+        }
+
+            .hero h2 {
+                font-size: 36px;
+                margin-bottom: 15px;
+                color: #2c3e50;
+            }
+
+            .hero p {
+                font-size: 18px;
+                color: #7f8c8d;
+            }
+
+        .api-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+
+        .api-card {
+            background: white;
+            border-radius: 10px;
+            padding: 30px;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            transition: transform 0.3s, box-shadow 0.3s;
+            cursor: pointer;
+        }
+
+            .api-card:hover {
+                transform: translateY(-5px);
+                box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            }
+
+            .api-card .icon {
+                font-size: 48px;
+                margin-bottom: 15px;
+            }
+
+            .api-card h3 {
+                font-size: 20px;
+                margin-bottom: 10px;
+                color: #2c3e50;
+            }
+
+            .api-card p {
+                font-size: 14px;
+                color: #7f8c8d;
+                line-height: 1.5;
+            }
+
+            .api-card .endpoint-count {
+                display: inline-block;
+                margin-top: 15px;
+                padding: 6px 12px;
+                background: #ecf0f1;
+                border-radius: 20px;
+                font-size: 12px;
+                color: #2c3e50;
+                font-weight: bold;
+            }
+
+        footer {
+            background-color: #2c3e50;
+            padding: 20px;
+            text-align: center;
+            color: white;
+            margin-top: 50px;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+            .modal.active {
+                display: flex;
+            }
+
+        .modal-content {
+            background: white;
+            border-radius: 10px;
+            padding: 30px;
+            max-width: 700px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            position: relative;
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            font-size: 28px;
+            cursor: pointer;
+            color: #7f8c8d;
+            border: none;
+            background: none;
+        }
+
+            .modal-close:hover {
+                color: #2c3e50;
+            }
+
+        .modal h2 {
+            margin-bottom: 20px;
+            color: #2c3e50;
+        }
+
+        .endpoint-item {
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            background: #f8f9fa;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+            .endpoint-item:hover {
+                background: #e9ecef;
+            }
+
+        .endpoint-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .endpoint-details {
+            display: none;
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #dee2e6;
+        }
+
+            .endpoint-details.active {
+                display: block;
+            }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+            .form-group label {
+                display: block;
+                margin-bottom: 5px;
+                font-weight: bold;
+                color: #2c3e50;
+                font-size: 14px;
+            }
+
+            .form-group input,
+            .form-group textarea {
+                width: 100%;
+                padding: 10px;
+                border: 1px solid #ced4da;
+                border-radius: 5px;
+                font-size: 14px;
+                font-family: monospace;
+            }
+
+            .form-group textarea {
+                min-height: 100px;
+                resize: vertical;
+            }
+
+        .try-btn {
+            background: #0078ff;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            margin-top: 10px;
+            position: relative;
+            z-index: 10;
+        }
+
+            .try-btn:hover {
+                background: #005fcc;
+            }
+
+            .try-btn:disabled {
+                background: #ccc;
+                cursor: not-allowed;
+            }
+
+        .response-section {
+            margin-top: 15px;
+            display: none;
+        }
+
+            .response-section.active {
+                display: block;
+            }
+
+        .response-header {
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #2c3e50;
+        }
+
+        .response-body {
+            background: #263238;
+            color: #aed581;
+            padding: 15px;
+            border-radius: 5px;
+            font-family: monospace;
+            font-size: 13px;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .response-status {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+            .response-status.success {
+                background: #49cc90;
+                color: white;
+            }
+
+            .response-status.error {
+                background: #f93e3e;
+                color: white;
+            }
+
+        .method-badge {
+            padding: 6px 12px;
+            border-radius: 4px;
+            font-weight: bold;
+            font-size: 12px;
+            min-width: 70px;
+            text-align: center;
+        }
+
+            .method-badge.get {
+                background-color: #61affe;
+                color: white;
+            }
+
+            .method-badge.post {
+                background-color: #49cc90;
+                color: white;
+            }
+
+            .method-badge.put {
+                background-color: #fca130;
+                color: white;
+            }
+
+            .method-badge.delete {
+                background-color: #f93e3e;
+                color: white;
+            }
+
+        .endpoint-path {
+            font-family: monospace;
+            color: #2c3e50;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="navbar">
+        <h1>Smart Library</h1>
+        <nav>
+            <a href="home.html">Home</a>
+            <a href="#" onclick="showAPI('book')">Books</a>
+            <a href="#" onclick="showAPI('user')">Users</a>
+            <a href="#" onclick="showAPI('loan')">Borrow & Return</a>
+            <a href="#" onclick="showSwagger()">API Docs</a>
+            <button class="logout-btn" onclick="logout()">Logout</button>
+        </nav>
+    </div>
+
+    <div class="container">
+        <div class="hero">
+            <h2>Welcome to the Smart Library Management System</h2>
+            <p>Manage books, users, borrowings, returns, and fines — all in one smart system.</p>
+        </div>
+
+        <div class="api-grid">
+            <div class="api-card" onclick="showAPI('auth')">
+                <div class="icon">🔐</div>
+                <h3>Authentication</h3>
+                <p>Secure login and authentication endpoints for user access management.</p>
+                <span class="endpoint-count">1 Endpoint</span>
+            </div>
+            <div class="api-card" onclick="showAPI('book')">
+                <div class="icon">📚</div>
+                <h3>Book Catalog</h3>
+                <p>Browse, search, update, and manage library books through REST APIs.</p>
+                <span class="endpoint-count">6 Endpoints</span>
+            </div>
+            <div class="api-card" onclick="showAPI('user')">
+                <div class="icon">👥</div>
+                <h3>User Management</h3>
+                <p>Manage Students, Faculty, and Librarians with full CRUD operations.</p>
+                <span class="endpoint-count">5 Endpoints</span>
+            </div>
+            <div class="api-card" onclick="showAPI('loan')">
+                <div class="icon">🔄</div>
+                <h3>Borrow & Return</h3>
+                <p>Easily process book loans and returns with tracking capabilities.</p>
+                <span class="endpoint-count">4 Endpoints</span>
+            </div>
+            <div class="api-card" onclick="showAPI('weather')">
+                <div class="icon">🌤️</div>
+                <h3>Weather Forecast</h3>
+                <p>Sample weather forecast API for demonstration purposes.</p>
+                <span class="endpoint-count">1 Endpoint</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="apiModal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeModal()">×</button>
+            <div id="modalBody"></div>
+        </div>
+    </div>
+
+    <footer>Smart Library Management System © 2025</footer>
+
+    <script>
+        const apiData = {
+            auth: {
+                title: 'Authentication APIs',
+                endpoints: [{ method: 'POST', path: '/api/Auth/login', params: [], body: { email: 'user@example.com', password: 'password123' } }]
+            },
+            book: {
+                title: 'Book Management APIs',
+                endpoints: [
+                    { method: 'GET', path: '/api/books', params: [], body: null },
+                    { method: 'POST', path: '/api/books', params: [], body: { title: 'Book Title', author: 'Author Name', isbn: '978-1234567890', totalCopies: 5, copiesAvailable: 5 } },
+                    { method: 'GET', path: '/api/books/{id}', params: ['id'], body: null },
+                    { method: 'PUT', path: '/api/books/{id}', params: ['id'], body: { title: 'Updated Title', author: 'Updated Author', isbn: '978-1234567890', totalCopies: 5, copiesAvailable: 3 } },
+                    { method: 'DELETE', path: '/api/books/{id}', params: ['id'], body: null },
+                    { method: 'GET', path: '/api/books/search', params: ['query'], body: null }
+                ]
+            },
+            user: {
+                title: 'User Management APIs',
+                endpoints: [
+                    { method: 'GET', path: '/api/users', params: [], body: null },
+                    { method: 'POST', path: '/api/users', params: [], body: { username: 'yukimoela', password: 'password123', name: 'Yuuki Moela', email: 'yuuki@email.com', role: 'Student', program: 'Computer Science' } },
+                    { method: 'GET', path: '/api/users/{id}', params: ['id'], body: null },
+                    { method: 'PUT', path: '/api/users/{id}', params: ['id'], body: { username: 'johndoe_updated', password: 'password123', name: 'John Doe Updated', email: 'john.updated@example.com', role: 'Faculty', department: 'Computer Science' } },
+                    { method: 'DELETE', path: '/api/users/{id}', params: ['id'], body: null }
+                ]
+            },
+            loan: {
+                title: 'Loan Management APIs',
+                endpoints: [
+                    { method: 'POST', path: '/api/loans/borrow', params: ['userId', 'bookId'], body: null },
+                    { method: 'POST', path: '/api/loans/return/{loanId}', params: ['loanId'], body: null },
+                    { method: 'GET', path: '/api/loans/user/{userId}', params: ['userId'], body: null },
+                    { method: 'GET', path: '/api/loans/{loanId}/fine', params: ['loanId'], body: null }
+                ]
+            },
+            weather: {
+                title: 'Weather Forecast API',
+                endpoints: [{ method: 'GET', path: '/WeatherForecast', params: [], body: null }]
+            }
+        };
+
+        function showAPI(category) {
+            const data = apiData[category];
+            const modal = document.getElementById('apiModal');
+            const modalBody = document.getElementById('modalBody');
+            let html = '<h2>' + data.title + '</h2>';
+            data.endpoints.forEach((endpoint, index) => {
+                const endpointId = category + '-' + index;
+                html += '<div class="endpoint-item" id="endpoint-' + endpointId + '"><div class="endpoint-header" onclick="toggleEndpoint(\'' + endpointId + '\')"><span class="method-badge ' + endpoint.method.toLowerCase() + '">' + endpoint.method + '</span><span class="endpoint-path">' + endpoint.path + '</span></div><div class="endpoint-details" id="details-' + endpointId + '">' + generateEndpointForm(endpoint, endpointId) + '</div></div>';
+            });
+            modalBody.innerHTML = html;
+            modal.classList.add('active');
+        }
+
+        function generateEndpointForm(endpoint, endpointId) {
+            let html = '';
+            if (endpoint.params && endpoint.params.length > 0) {
+                html += '<h4 style="margin-bottom: 10px;">Path Parameters:</h4>';
+                endpoint.params.forEach(param => {
+                    html += '<div class="form-group"><label>' + param + ':</label><input type="text" id="param-' + endpointId + '-' + param + '" placeholder="Enter ' + param + '" value="1"></div>';
+                });
+            }
+            if (endpoint.body) {
+                html += '<h4 style="margin-bottom: 10px;">Request Body:</h4><div class="form-group"><textarea id="body-' + endpointId + '">' + JSON.stringify(endpoint.body, null, 2) + '</textarea></div>';
+            }
+            html += '<button class="try-btn" onclick="executeRequest(\'' + endpointId + '\', \'' + endpoint.method + '\', \'' + endpoint.path + '\', ' + !!endpoint.body + ', ' + JSON.stringify(endpoint.params || []) + ')">Try it out</button>';
+            html += '<div class="response-section" id="response-' + endpointId + '"><div class="response-header">Response:</div><div id="status-' + endpointId + '"></div><div class="response-body" id="response-body-' + endpointId + '"></div></div>';
+            return html;
+        }
+
+        function toggleEndpoint(endpointId) {
+            document.getElementById('details-' + endpointId).classList.toggle('active');
+        }
+
+        async function executeRequest(endpointId, method, path, hasBody, params) {
+            const btn = event.target;
+            btn.disabled = true;
+            btn.textContent = 'Loading...';
+            let url = path;
+            let queryParams = [];
+            params.forEach(param => {
+                const value = document.getElementById('param-' + endpointId + '-' + param).value;
+                if (path.includes('{' + param + '}')) {
+                    url = url.replace('{' + param + '}', value);
+                } else {
+                    queryParams.push(param + '=' + encodeURIComponent(value));
+                }
+            });
+            if (queryParams.length > 0) {
+                url += '?' + queryParams.join('&');
+            }
+            const options = { method: method, headers: { 'Content-Type': 'application/json' } };
+            if (hasBody) {
+                const bodyText = document.getElementById('body-' + endpointId).value;
+                try {
+                    JSON.parse(bodyText);
+                    options.body = bodyText;
+                } catch (e) {
+                    showResponse(endpointId, 400, 'Invalid JSON in request body');
+                    btn.disabled = false;
+                    btn.textContent = 'Try it out';
+                    return;
+                }
+            }
+            try {
+                const response = await fetch(url, options);
+                const contentType = response.headers.get("content-type");
+                let responseData;
+                if (contentType && contentType.includes("application/json")) {
+                    responseData = await response.json();
+                } else {
+                    responseData = await response.text();
+                }
+                showResponse(endpointId, response.status, responseData);
+            } catch (error) {
+                showResponse(endpointId, 0, 'Error: ' + error.message);
+            }
+            btn.disabled = false;
+            btn.textContent = 'Try it out';
+        }
+
+        function showResponse(endpointId, status, data) {
+            const responseSection = document.getElementById('response-' + endpointId);
+            const statusEl = document.getElementById('status-' + endpointId);
+            const bodyEl = document.getElementById('response-body-' + endpointId);
+            responseSection.classList.add('active');
+            const statusClass = status >= 200 && status < 300 ? 'success' : 'error';
+            statusEl.innerHTML = '<span class="response-status ' + statusClass + '">Status: ' + status + '</span>';
+            if (typeof data === 'object') {
+                bodyEl.textContent = JSON.stringify(data, null, 2);
+            } else {
+                bodyEl.textContent = data;
+            }
+        }
+
+        function closeModal() {
+            document.getElementById('apiModal').classList.remove('active');
+        }
+
+        function showSwagger() {
+            window.open('/swagger', '_blank');
+        }
+
+        function logout() {
+            localStorage.removeItem("authToken");
+            window.location.href = "login.html";
+        }
+
+        document.getElementById('apiModal').addEventListener('click', function (e) {
+            if (e.target === this) {
+                closeModal();
+            }
+        });
+    </script>
+
+    <script src="home.js"></script>
+
+</body>
+</html>
